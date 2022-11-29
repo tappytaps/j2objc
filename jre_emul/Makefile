@@ -188,8 +188,12 @@ clean:
 	@rm -f $(JRE_EMUL_LICENSES)
 	@rm -rf $(FRAMEWORK_DIR)
 	@$(MAKE) -f java.mk clean
+	@$(MAKE) -f subset_frameworks/json_framework.mk clean
 
 dist: framework
+
+framework::
+	@$(MAKE) -f subset_frameworks/json_framework.mk framework
 
 lib: jre_emul_jars_dist libs_dist $(DIST_DIR)/j2objcc licenses
 
