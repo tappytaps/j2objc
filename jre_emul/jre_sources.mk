@@ -1338,6 +1338,7 @@ JAVA_PUBLIC_SOURCES_SECURITY = \
   java/security/cert/X509CRLSelector.java \
   java/security/cert/X509Extension.java \
   java/security/interfaces/DSAKey.java \
+  java/security/interfaces/DSAKeyPairGenerator.java \
   java/security/interfaces/DSAParams.java \
   java/security/interfaces/DSAPrivateKey.java \
   java/security/interfaces/DSAPublicKey.java \
@@ -1349,6 +1350,9 @@ JAVA_PUBLIC_SOURCES_SECURITY = \
   java/security/interfaces/RSAPrivateCrtKey.java \
   java/security/interfaces/RSAPrivateKey.java \
   java/security/interfaces/RSAPublicKey.java \
+  java/security/interfaces/XECKey.java \
+  java/security/interfaces/XECPrivateKey.java \
+  java/security/interfaces/XECPublicKey.java \
   java/security/spec/AlgorithmParameterSpec.java \
   java/security/spec/DSAParameterSpec.java \
   java/security/spec/DSAPrivateKeySpec.java \
@@ -1367,6 +1371,7 @@ JAVA_PUBLIC_SOURCES_SECURITY = \
   java/security/spec/InvalidParameterSpecException.java \
   java/security/spec/KeySpec.java \
   java/security/spec/MGF1ParameterSpec.java \
+  java/security/spec/NamedParameterSpec.java \
   java/security/spec/PKCS8EncodedKeySpec.java \
   java/security/spec/PSSParameterSpec.java \
   java/security/spec/RSAKeyGenParameterSpec.java \
@@ -1376,6 +1381,8 @@ JAVA_PUBLIC_SOURCES_SECURITY = \
   java/security/spec/RSAPrivateKeySpec.java \
   java/security/spec/RSAPublicKeySpec.java \
   java/security/spec/X509EncodedKeySpec.java \
+  java/security/spec/XECPrivateKeySpec.java \
+  java/security/spec/XECPublicKeySpec.java \
   java/util/UUID.java \
   javax/crypto/AEADBadTagException.java \
   javax/crypto/BadPaddingException.java \
@@ -2047,6 +2054,7 @@ JAVA_PRIVATE_SOURCES_TIME = \
   java/time/zone/ZoneRulesProvider.java \
   sun/util/locale/provider/CalendarDataUtility.java
 
+#ExtendedTimeZone, ExtendedCalendar and ExtendedDateFormatSymbols are really private but referenced from the java_time_lib#
 JAVA_PUBLIC_SOURCES_ICU = \
   android/icu/lang/UCharacter.java \
   android/icu/lang/UCharacterCategory.java \
@@ -2103,6 +2111,9 @@ JAVA_PUBLIC_SOURCES_ICU = \
   android/icu/util/ULocale.java \
   android/icu/util/ValueIterator.java \
   android/icu/util/VersionInfo.java \
+  com/android/icu/util/ExtendedTimeZone.java \
+  com/android/icu/util/ExtendedCalendar.java \
+  com/android/icu/text/ExtendedDateFormatSymbols.java \
   java/text/BreakIterator.java \
 
 JAVA_PRIVATE_SOURCES_ICU = \
