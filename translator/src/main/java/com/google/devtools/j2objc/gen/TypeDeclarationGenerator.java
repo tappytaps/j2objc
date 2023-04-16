@@ -14,6 +14,8 @@
 
 package com.google.devtools.j2objc.gen;
 
+import static java.util.stream.Collectors.joining;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -118,7 +120,7 @@ public class TypeDeclarationGenerator extends TypeGenerator {
     if (typeElement.getKind().isInterface()) {
       printf("@protocol %s", typeName);
     } else {
-      printf("@interface %s : %s", typeName, getSuperTypeName());
+      printInterfaceType();
     }
     printImplementedProtocols();
     if (!typeElement.getKind().isInterface()) {
@@ -159,6 +161,7 @@ public class TypeDeclarationGenerator extends TypeGenerator {
 
     List<EnumConstantDeclaration> constants = ((EnumDeclaration) typeNode).getEnumConstants();
     String nativeName = NameTable.getNativeEnumName(typeName);
+    String ordinalName = NameTable.getNativeOrdinalPreprocessorName(typeName);
 
     // C doesn't allow empty enum declarations.  Java does, so we skip the
     // C enum declaration and generate the type declaration.
@@ -176,6 +179,17 @@ public class TypeDeclarationGenerator extends TypeGenerator {
       }
       unindent();
       print("};\n");
+      // Use different types for transpiled Java ordinals (which expects ordinals to be jint) and
+      // native code using the enum (where stricter ordinal types help clang warnings).
+      printf(
+          "#if J2OBJC_IMPORTED_BY_JAVA_IMPLEMENTATION\n"
+              + "#define %s jint\n"
+              + "#else\n"
+              + "#define %s %s\n"
+              + "#endif\n\n",
+          ordinalName, ordinalName, nativeName);
+    } else {
+      printf("#define %s jint\n", ordinalName);
     }
   }
 
@@ -210,6 +224,22 @@ public class TypeDeclarationGenerator extends TypeGenerator {
       names.add("JavaObject");
     }
     return names;
+  }
+
+  private void printInterfaceType() {
+    printf("@interface %s", typeName);
+    if (needsGenerateObjectiveCGenerics() && !typeElement.getTypeParameters().isEmpty()) {
+      printf(
+          "<%s>",
+          typeElement.getTypeParameters().stream()
+              .map(Element::getSimpleName)
+              .collect(joining(", ")));
+    }
+    printf(" : %s", getSuperTypeName());
+  }
+
+  private boolean needsGenerateObjectiveCGenerics() {
+    return options.asObjCGenericDecl() || hasGenerateObjectiveCGenerics(typeElement.asType());
   }
 
   private void printImplementedProtocols() {
@@ -575,7 +605,7 @@ public class TypeDeclarationGenerator extends TypeGenerator {
     newline();
     JavadocGenerator.printDocComment(getBuilder(), m.getJavadoc());
 
-    String methodSignature = getMethodSignature(m, options.asObjCGenericDecl());
+    String methodSignature = getMethodSignature(m, needsGenerateObjectiveCGenerics());
 
     // In order to properly map the method name from the entire signature, we must isolate it from
     // associated type and parameter declarations.  The method name is guaranteed to be between the

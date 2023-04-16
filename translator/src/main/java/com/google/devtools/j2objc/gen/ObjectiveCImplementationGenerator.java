@@ -51,9 +51,11 @@ public class ObjectiveCImplementationGenerator extends ObjectiveCSourceFileGener
 
   public void generate() {
     print(J2ObjC.getFileHeader(options, getGenerationUnit().getSourceName()));
+    printImportedByJavaImplementation();
     printOptionBuildFlags();
     printImports();
     printMemoryManagement();
+    printCompilerSimilarityPragmas();
     printIgnoreIncompletePragmas();
     pushIgnoreDeprecatedDeclarationsPragma();
     for (GeneratedType generatedType : getOrderedTypes()) {
@@ -64,6 +66,21 @@ public class ObjectiveCImplementationGenerator extends ObjectiveCSourceFileGener
     }
     popIgnoreDeprecatedDeclarationsPragma();
     save(getOutputPath(), options.fileUtil().getOutputDirectory());
+  }
+
+  private void printCompilerSimilarityPragmas() {
+    newline();
+
+    // Ensure that code paths not returning are errors as they would be with Java.
+    println("#pragma clang diagnostic error \"-Wreturn-type\"");
+
+    // Java handles incomplete switch enum coverage as a function of a missing return so
+    // disable the Clang warning for this (which is commonly enabled). This is a little
+    // over-broad, but we do not expect generated code to trigger the other warnings covered
+    // by this switch.
+    println("#pragma clang diagnostic ignored \"-Wswitch\"");
+
+    newline();
   }
 
   private void printIgnoreIncompletePragmas() {
@@ -79,6 +96,12 @@ public class ObjectiveCImplementationGenerator extends ObjectiveCSourceFileGener
     }
   }
 
+  private void printImportedByJavaImplementation() {
+    newline();
+    println("#define J2OBJC_IMPORTED_BY_JAVA_IMPLEMENTATION 1");
+    newline();
+  }
+
   private void printOptionBuildFlags() {
     newline();
     if (options.useStrictFieldAssign()) {
@@ -86,6 +109,12 @@ public class ObjectiveCImplementationGenerator extends ObjectiveCSourceFileGener
     }
     if (options.useStrictFieldLoad()) {
       println("#define J2OBJC_STRICT_FIELD_LOAD 1");
+    }
+    if (options.useRetainAutoreleaseReturns()) {
+      println("#define J2OBJC_RETAIN_AUTORELEASE_RETURNS 1");
+    }
+    if (options.useARCAutoreleaseReturns()) {
+      println("#define J2OBJC_ARC_AUTORELEASE_RETURNS 1");
     }
     newline();
   }

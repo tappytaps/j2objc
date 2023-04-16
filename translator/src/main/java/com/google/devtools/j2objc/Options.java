@@ -18,6 +18,7 @@ import static com.google.common.io.FileWriteMode.APPEND;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Ascii;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableSet;
@@ -60,6 +61,7 @@ import java.util.regex.Pattern;
  *
  * @author Tom Ball
  */
+@SuppressWarnings("SystemExitOutsideMain")
 public class Options {
 
   private List<String> processorPathEntries = new ArrayList<>();
@@ -67,6 +69,8 @@ public class Options {
   private MemoryManagementOption memoryManagementOption = null;
   private boolean strictFieldAssign = false;
   private boolean strictFieldLoad = false;
+  private boolean retainAutoreleaseReturns = false;
+  private boolean arcAutoreleaseReturns = false;
   private EmitLineDirectivesOption emitLineDirectives = EmitLineDirectivesOption.NONE;
   private boolean warningsAsErrors = false;
   private boolean deprecatedDeclarations = false;
@@ -101,6 +105,8 @@ public class Options {
   private boolean injectLogSites = false;
   private boolean allVersions = false;
   private boolean asObjCGenericDecl = false;
+  private boolean ignoreJarWarnings = false;
+  private boolean linkSourcePathHeaders = false;
 
   private Mappings mappings = new Mappings();
   private FileUtil fileUtil = new FileUtil();
@@ -414,6 +420,11 @@ public class Options {
       } else if (arg.equals("-Xstrict-field-load")) {
         strictFieldAssign = true;
         strictFieldLoad = true;
+      } else if (arg.equals("-Xretain-autorelease-returns")) {
+        retainAutoreleaseReturns = true;
+      } else if (arg.equals("-Xarc-autorelease-returns")) {
+        retainAutoreleaseReturns = true;
+        arcAutoreleaseReturns = true;
       } else if (arg.equals("-g")) {
         emitLineDirectives = EmitLineDirectivesOption.NORMAL;
       } else if (arg.equals("-g:none")) {
@@ -431,7 +442,7 @@ public class Options {
       } else if (arg.startsWith(TIMING_INFO_ARG + ':')) {
         String timingArg = arg.substring(TIMING_INFO_ARG.length() + 1);
         try {
-          timingLevel = TimingLevel.valueOf(timingArg.toUpperCase());
+          timingLevel = TimingLevel.valueOf(Ascii.toUpperCase(timingArg));
         } catch (IllegalArgumentException e) {
           usage("invalid --timing-info argument");
         }
@@ -443,6 +454,10 @@ public class Options {
         // TODO(tball): remove flag when all client builds stop using it.
       } else if (arg.equals("-Xno-jsni-warnings")) {
         jsniWarnings = false;
+      } else if (arg.equals("-Xignore-jar-warnings")) {
+        ignoreJarWarnings = true;
+      } else if (arg.equals("-Xlink-source-path-headers")) {
+        linkSourcePathHeaders = true;
       } else if (arg.equals("-encoding")) {
         try {
           fileUtil.setFileEncoding(getArgValue(args, arg));
@@ -821,6 +836,30 @@ public class Options {
     strictFieldLoad = b;
   }
 
+  public boolean useRetainAutoreleaseReturns() {
+    return retainAutoreleaseReturns;
+  }
+
+  @VisibleForTesting
+  public void setRetainAutoreleaseReturns(boolean b) {
+    retainAutoreleaseReturns = b;
+    if (!b) {
+      arcAutoreleaseReturns = false;
+    }
+  }
+
+  public boolean useARCAutoreleaseReturns() {
+    return arcAutoreleaseReturns;
+  }
+
+  @VisibleForTesting
+  public void setARCAutoreleaseReturns(boolean b) {
+    arcAutoreleaseReturns = b;
+    if (b) {
+      retainAutoreleaseReturns = true;
+    }
+  }
+
   @VisibleForTesting
   public void setMemoryManagementOption(MemoryManagementOption option) {
     memoryManagementOption = option;
@@ -1166,5 +1205,18 @@ public class Options {
   @VisibleForTesting
   public void setAsObjCGenericDecl(boolean b) {
     asObjCGenericDecl = b;
+  }
+
+  public boolean ignoreJarWarnings() {
+    return ignoreJarWarnings;
+  }
+
+  public boolean linkSourcePathHeaders() {
+    return linkSourcePathHeaders;
+  }
+
+  @VisibleForTesting
+  public void setLinkSourcePathHeaders(boolean b) {
+    linkSourcePathHeaders = b;
   }
 }
