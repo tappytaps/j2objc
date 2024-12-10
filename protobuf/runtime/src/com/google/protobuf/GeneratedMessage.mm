@@ -1885,11 +1885,9 @@ static BOOL MergeFieldFromStream(
   BOOL repeated = CGPFieldIsRepeated(field);
   BOOL isGroup = NO;
   CGPHasLocator hasLoc;
-  BOOL alreadyCleared = NO;
   if (!repeated) {
     hasLoc = GetHasLocator(msgCls, field);
     ClearPreviousOneof(msg, hasLoc, fieldPtr);
-    alreadyCleared = YES;
   }
   switch (CGPFieldGetType(field)) {
 #define MERGE_FIELD_CASE(NAME, ENUM_NAME, JAVA_NAME) \
@@ -1970,9 +1968,7 @@ static BOOL MergeFieldFromStream(
           CGPRepeatedFieldAddRetainedId((CGPRepeatedField *)fieldPtr, value);
         } else {
           id *ptr = (id *)fieldPtr;
-          if (!alreadyCleared) {
-            AUTORELEASE(*ptr);
-          }
+          AUTORELEASE(*ptr);
           *ptr = value;
           SetHas(msg, hasLoc);
         }
@@ -1986,9 +1982,7 @@ static BOOL MergeFieldFromStream(
           CGPRepeatedFieldAddRetainedId((CGPRepeatedField *)fieldPtr, value);
         } else {
           id *ptr = (id *)fieldPtr;
-          if (!alreadyCleared) {
-            AUTORELEASE(*ptr);
-          }
+          AUTORELEASE(*ptr);
           *ptr = value;
           SetHas(msg, hasLoc);
         }
@@ -2012,9 +2006,7 @@ static BOOL MergeFieldFromStream(
             CopyMessage(msgField, MessageExtensionMap(msgField, fieldType),
                         *ptr, MessageExtensionMap(*ptr, fieldType), fieldType);
           }
-          if (!alreadyCleared) {
-            AUTORELEASE(*ptr);
-          }
+          AUTORELEASE(*ptr);
           *ptr = msgField;
           SetHas(msg, hasLoc);
         }
@@ -3446,7 +3438,7 @@ static int MessageHash(ComGoogleProtobufGeneratedMessage *msg, CGPDescriptor *de
 }
 
 - (IOSByteArray *)toByteArray {
-  RETAIN_AND_AUTORELEASE(self);
+  //RETAIN_AND_AUTORELEASE(self);
   CGPDescriptor *descriptor = [object_getClass(self) getDescriptor];
   jint size = [self getSerializedSize];
   IOSByteArray *array = [IOSByteArray arrayWithLength:size];
@@ -3463,7 +3455,7 @@ static int MessageHash(ComGoogleProtobufGeneratedMessage *msg, CGPDescriptor *de
 }
 
 - (CGPByteString *)toByteString {
-  RETAIN_AND_AUTORELEASE(self);
+  //RETAIN_AND_AUTORELEASE(self);
   CGPDescriptor *descriptor = [object_getClass(self) getDescriptor];
   jint size = [self getSerializedSize];
   CGPByteString *byteString = CGPNewByteString(size);
@@ -3480,7 +3472,7 @@ static int MessageHash(ComGoogleProtobufGeneratedMessage *msg, CGPDescriptor *de
 }
 
 - (NSData *)toNSData {
-  RETAIN_AND_AUTORELEASE(self);
+  //RETAIN_AND_AUTORELEASE(self);
   CGPDescriptor *descriptor = [object_getClass(self) getDescriptor];
   jint size = [self getSerializedSize];
   void *buffer = calloc(size, 1);
@@ -3497,7 +3489,7 @@ static int MessageHash(ComGoogleProtobufGeneratedMessage *msg, CGPDescriptor *de
 }
 
 - (void)writeToWithJavaIoOutputStream:(JavaIoOutputStream *)output {
-  RETAIN_AND_AUTORELEASE(self);
+  //RETAIN_AND_AUTORELEASE(self);
   CGPDescriptor *descriptor = [object_getClass(self) getDescriptor];
   CGPCodedOutputStream codedStream(output);
   WriteMessage(self, descriptor, &codedStream);
@@ -3507,7 +3499,7 @@ static int MessageHash(ComGoogleProtobufGeneratedMessage *msg, CGPDescriptor *de
 }
 
 - (void)writeDelimitedToWithJavaIoOutputStream:(JavaIoOutputStream *)output {
-  RETAIN_AND_AUTORELEASE(self);
+  //RETAIN_AND_AUTORELEASE(self);
   CGPDescriptor *descriptor = [object_getClass(self) getDescriptor];
   CGPCodedOutputStream codedStream(output);
   CGPWriteInt32(SerializedSizeForMessage(self, descriptor), &codedStream);
@@ -3518,7 +3510,7 @@ static int MessageHash(ComGoogleProtobufGeneratedMessage *msg, CGPDescriptor *de
 }
 
 - (void)writeToWithComGoogleProtobufCodedOutputStream:(ComGoogleProtobufCodedOutputStream *)output {
-  RETAIN_AND_AUTORELEASE(self);
+  //RETAIN_AND_AUTORELEASE(self);
   CGPDescriptor *descriptor = [object_getClass(self) getDescriptor];
   CGPCodedOutputStream *codedStream = output->codedStream_;
   WriteMessage(self, descriptor, codedStream);
