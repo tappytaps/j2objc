@@ -83,6 +83,20 @@ $(BUILD_DIR)/%.o: src/%.cc
 $(PROTOC_EXE): $(OBJS) $(MAIN_OBJ)
 	$(CXX) $(LDFLAGS) -o $@ $^
 
+	@for REF in $$(otool -L $@ \
+	   | grep -E '[^ ]*libproto(c|buf)\.[^ ]*\.dylib' \
+	   | awk '{print $$1}'); do \
+	  DIR=$$(dirname "$$REF"); \
+	  BASE=$$(basename "$$REF"); \
+	  NAME=$$(echo "$$BASE" \
+	    | sed -E 's/^(libprotobuf|libprotoc)\..*\.dylib/\1.dylib/'); \
+	  NEW="$$DIR/$$NAME"; \
+	  echo ">> install_name_tool: $$REF -> $$NEW"; \
+	  install_name_tool -change "$$REF" "$$NEW" $@; \
+	done
+
+
+
 $(PROTOC_PLUGIN): $(OBJS) $(PLUGIN_OBJ)
 	$(CXX) $(LDFLAGS) -o $@ $^
 
